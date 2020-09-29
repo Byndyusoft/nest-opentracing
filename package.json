@@ -1,0 +1,36 @@
+{
+  "name": "nest-opentracing",
+  "version": "1.0.0",
+  "description": "Nest.js implementation of opentracing",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Byndyusoft/nest-opentracing.git"
+  },
+  "keywords": [
+    "nest",
+    "opentracing"
+  ],
+  "devDependencies": {
+    "@nestjs/common": "^7.4.4",
+    "axios": "^0.20.0",
+    "opentracing": "^0.14.4",
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {},
+  "peerDependencies": {
+    "@nestjs/common": "7.4.4",
+    "axios": "^0.20.0",
+    "express": "4.17.1"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "author": "Byndyusoft",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Byndyusoft/nest-opentracing/issues"
+  },
+  "homepage": "https://github.com/Byndyusoft/nest-opentracing#readme"
+}
