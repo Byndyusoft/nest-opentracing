@@ -12,7 +12,7 @@ export interface TracedAxiosRequestConfig extends AxiosRequestConfig {
   };
 }
 
-const isAxiosError = (error) =>
+const isAxiosError = (error: any) =>
   error.isAxiosError && error.isAxiosError === true;
 const isErrorStatus = (status: number) => status >= 500;
 
@@ -35,7 +35,7 @@ export class TracingAxiosInterceptor implements OnModuleInit {
     );
   }
 
-  private requestFulfilled(): (AxiosRequestConfig) => AxiosRequestConfig {
+  private requestFulfilled(): (axiosConfig: AxiosRequestConfig) => AxiosRequestConfig {
     return (axiosConfig) => {
       try {
         const span = this.tracingService.createChildSpan("http-call");
