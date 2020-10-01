@@ -50,7 +50,7 @@
     "prettier": "^2.0.5",
     "rxjs": "^6.6.3",
     "ts-jest": "^26.3.0",
-    "typescript": "^3.8.3"
+    "typescript": "^3.9.3"
   },
   "dependencies": {
     "opentracing": "~0.14.4",

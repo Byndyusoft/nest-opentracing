@@ -1,32 +1,16 @@
 {
   "compilerOptions": {
-    // Project Options
     "declaration": true,
-    "declarationMap": true,
-    "importHelpers": true,
-    // "lib": ["ES2019", "ES2020.Promise", "ES2020.BigInt", "ES2020.String"],
-    "module": "CommonJS",
-    "outDir": "./dist",
+    "removeComments": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2017",
     "sourceMap": true,
-    "target": "ES2017",
-  
-    // Strict Checks
-    // "strict": true,
-    // Linter Checks
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitReturns": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    // Experimental
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    // Advanced
-    "allowUnreachableCode": false,
-    "forceConsistentCasingInFileNames": true,
-    "newLine": "lf",
-    "preserveConstEnums": true,
-    "skipLibCheck": true,
-    "removeComments": true
+    "module": "CommonJS",
   },
   "include": ["./**/*.ts"],
   "exclude": ["./dist", "./node_modules", "./**/*.spec.ts"]
