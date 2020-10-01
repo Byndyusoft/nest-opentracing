@@ -1,0 +1,20 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "extends": ["plugin:@typescript-eslint/recommended", "plugin:jest/recommended"],
+  "plugins": ["jest"],
+  "settings": {
+    "import/resolver": {
+      "typescript": {} // this loads <rootdir>/tsconfig.json to eslint
+    }
+  },
+
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "rules": {
+    "no-unused-vars": "warn",
+    "jest/no-alias-methods": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off"
+  }
+}
