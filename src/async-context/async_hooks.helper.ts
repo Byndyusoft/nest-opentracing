@@ -5,10 +5,9 @@ export class AsyncHooksHelper {
   public static createHooks(storage: AsyncHooksStorage): asyncHooks.AsyncHook {
     function init(
       asyncId: number,
-      type: string,
+      _type: string,
       triggerId: number,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      resource: object
+      _resource: Record<string, unknown>
     ) {
       if (storage.has(triggerId)) {
         storage.inherit(asyncId, triggerId);

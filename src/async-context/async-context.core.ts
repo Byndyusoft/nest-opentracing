@@ -1,6 +1,6 @@
 import { OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import * as asyncHooks from "async_hooks";
-import { UnknownAsyncContextException } from "../exceptions";
+import { UnknownAsyncContextException } from "./unknown-async-context.exception";
 import { AsyncHooksHelper } from "./async_hooks.helper";
 import { AsyncHooksStorage } from "./async-context.storage";
 
@@ -46,7 +46,7 @@ export class AsyncContext implements OnModuleInit, OnModuleDestroy {
     return store.get(key) as TReturnValue;
   }
 
-  public run(fn: Function) {
+  public run(fn: () => void) {
     const eid = asyncHooks.executionAsyncId();
     this.internalStorage.set(eid, new Map());
     fn();

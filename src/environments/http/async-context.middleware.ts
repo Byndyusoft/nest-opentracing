@@ -5,7 +5,7 @@ import { AsyncContext } from "../../async-context";
 export class AsyncContextMiddleware implements NestMiddleware {
   constructor(private readonly asyncContext: AsyncContext) {}
 
-  public use(req: Request, res: Response, next: () => void) {
+  public use(_req: Request, _res: Response, next: () => void) {
     this.asyncContext.run(next);
   }
 }

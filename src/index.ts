@@ -1,5 +1,7 @@
 export * from "./core";
 
-export { TracedHttpModule } from "./clients";
+export * from "./clients";
 
 export * from "./opentracing.module";
+
+export * from "./jaeger-tracing.module";
