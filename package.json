@@ -2,8 +2,28 @@
   "name": "nest-opentracing",
   "version": "1.0.0",
   "description": "Nest.js implementation of opentracing",
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=10"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "test": "jest"
+    "build": "tsc src/*.ts",
+    "test": "jest",
+    "lint": "yarn run lint:eslint && yarn run lint:markdown && yarn run lint:prettier",
+    "lint:eslint": "eslint --ignore-path ./.gitignore --max-warnings 0 --ext .ts,.js .",
+    "lint:eslint:fix": "eslint --ignore-path ./.gitignore --fix --ext .ts,.js .",
+    "lint:fix": "yarn run lint:eslint:fix && yarn run lint:markdown:fix && yarn run lint:prettier:fix",
+    "lint:markdown": "markdownlint --ignore-path ./.gitignore \"./**/*.md\"",
+    "lint:markdown:fix": "markdownlint --ignore-path ./.gitignore --fix \"./**/*.md\"",
+    "lint:prettier": "prettier --ignore-path ./.gitignore --check \"./**/*.{ts,js,json,yaml,yml,md}\"",
+    "lint:prettier:fix": "prettier --ignore-path ./.gitignore --write \"./**/*.{ts,js,json,yaml,yml,md}\""
   },
   "repository": {
     "type": "git",
@@ -14,13 +34,27 @@
     "opentracing"
   ],
   "devDependencies": {
+    "@nestjs/common": "7.4.4",
+    "@types/jaeger-client": "^3.15.4",
+    "@types/express": "4.17.8",
+    "@types/axios": "^0.14.0",
+    "@types/jest": "^26.0.9",
     "@types/node": "^14.11.2",
-    "typescript": "^3.8.3"
+    "typescript": "^3.8.3",
+    "@typescript-eslint/eslint-plugin": "^4.0.1",
+    "@typescript-eslint/parser": "^4.0.1",
+    "eslint": "^7.6.0",
+    "eslint-import-resolver-typescript": "^2.2.1",
+    "eslint-plugin-jest": "^23.20.0",
+    "prettier": "^2.0.5",
+    "ts-jest": "^26.3.0",
+    "jest": "^26.4.2",
+    "jest-extended": "^0.11.5"
   },
   "dependencies": {
-    "opentracing": "^0.14.4",
-    "jaeger-client": "3.18.1",
-    "prom-client": "12.0.0"
+    "opentracing": "~0.14.4",
+    "jaeger-client": "~3.18.1",
+    "prom-client": "~11.3.0"
   },
   "peerDependencies": {
     "@nestjs/common": "7.4.4",
@@ -34,5 +68,13 @@
   "bugs": {
     "url": "https://github.com/Byndyusoft/nest-opentracing/issues"
   },
-  "homepage": "https://github.com/Byndyusoft/nest-opentracing#readme"
+  "homepage": "https://github.com/Byndyusoft/nest-opentracing#readme",
+  "jest": {
+    "testEnvironment": "node",
+    "preset": "ts-jest",
+    "testPathIgnorePatterns": [
+      "/deps/",
+      "/node_modules/"
+    ]
+  }
 }

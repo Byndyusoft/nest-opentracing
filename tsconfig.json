@@ -4,13 +4,14 @@
     "declaration": true,
     "declarationMap": true,
     "importHelpers": true,
-    "lib": ["ES2019", "ES2020.Promise", "ES2020.BigInt", "ES2020.String"],
+    // "lib": ["ES2019", "ES2020.Promise", "ES2020.BigInt", "ES2020.String"],
     "module": "CommonJS",
     "outDir": "./dist",
     "sourceMap": true,
-    "target": "ES2019",
+    "target": "ES2017",
+  
     // Strict Checks
-    "strict": true,
+    // "strict": true,
     // Linter Checks
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
@@ -24,8 +25,9 @@
     "forceConsistentCasingInFileNames": true,
     "newLine": "lf",
     "preserveConstEnums": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "removeComments": true
   },
-  "exclude": ["./dist", "./node_modules"],
-  "include": ["./**/*.ts"]
+  "include": ["./**/*.ts"],
+  "exclude": ["./dist", "./node_modules", "./**/*.spec.ts"]
 }
