@@ -4,7 +4,7 @@ import { Span, Tags } from "opentracing";
 
 import { TracingService, TracingNotInitializedException } from "../../core";
 
-export const TRACING_AXIOS_CONFIG_KEY = Symbol("kTracingAxiosInterceptor");
+const TRACING_AXIOS_CONFIG_KEY = Symbol("kTracingAxiosInterceptor");
 
 export interface TracedAxiosRequestConfig extends AxiosRequestConfig {
   [TRACING_AXIOS_CONFIG_KEY]?: {
@@ -12,7 +12,7 @@ export interface TracedAxiosRequestConfig extends AxiosRequestConfig {
   };
 }
 
-const isAxiosError = (error: any) =>
+const isAxiosError = (error: Record<string, unknown>) =>
   error.isAxiosError && error.isAxiosError === true;
 const isErrorStatus = (status: number) => status >= 500;
 
@@ -71,12 +71,14 @@ export class TracingAxiosInterceptor implements OnModuleInit {
           const span = this.getSpanFromConfig(error.config);
 
           if (span) {
+            span
             span.setTag(Tags.ERROR, true);
             span.setTag(Tags.SAMPLING_PRIORITY, 1);
             span.log({
               event: "error",
               message: error.message,
             });
+            console.log("span finish on request rejected");
             span.finish();
           }
         } catch (tracingError) {
@@ -113,7 +115,8 @@ export class TracingAxiosInterceptor implements OnModuleInit {
 
         throw err;
       } finally {
-        if (span) span.finish();
+        
+        if (span) {console.log("span finish on response fullfiled"); span.finish();} 
       }
       return response;
     };
@@ -139,7 +142,7 @@ export class TracingAxiosInterceptor implements OnModuleInit {
               // Networking Error
               span.log({ event: "error", message: "Networking error" });
             }
-
+            console.log("span finish on response rejected");
             span.finish();
           }
         } catch (tracingError) {
