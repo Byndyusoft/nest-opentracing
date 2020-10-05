@@ -8,14 +8,13 @@ import { TracingService, Tracer } from "./tracing.service";
   exports: [TracingService],
 })
 export class TracingCoreModule {
-  static forRoot(tracerInstance: Tracer): DynamicModule {
+  static forRoot(options: { tracer: Tracer }): DynamicModule {
     return {
-      global: true,
       module: TracingCoreModule,
       providers: [
         {
           provide: Tracer,
-          useValue: tracerInstance,
+          useFactory: () => options.tracer,
         },
       ],
     };

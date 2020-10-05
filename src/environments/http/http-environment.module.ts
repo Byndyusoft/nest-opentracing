@@ -1,4 +1,5 @@
 import { Global, MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
+import { TracingOptions } from "../../core";
 import { AsyncContextModule } from "../../async-context";
 import { AsyncContextMiddleware } from "./async-context.middleware";
 import { HttpTracingMiddleware } from "./tracing.middleware";
@@ -7,11 +8,15 @@ import { HttpTracingMiddleware } from "./tracing.middleware";
 @Global()
 @Module({ imports: [AsyncContextModule] })
 export class HttpEnvironmentModule implements NestModule {
+  constructor(private readonly options: TracingOptions) {}
   public configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(AsyncContextMiddleware)
-      .forRoutes("v1/*")
+      .exclude(...this.options.ignoreRoutes)
+      .forRoutes(...this.options.applyRoutes)
+
       .apply(HttpTracingMiddleware)
-      .forRoutes("v1/*");
+      .exclude(...this.options.ignoreRoutes)
+      .forRoutes(...this.options.applyRoutes);
   }
 }

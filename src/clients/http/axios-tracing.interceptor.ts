@@ -6,36 +6,26 @@ import { TracingService, TracingNotInitializedException } from "../../core";
 
 const TRACING_AXIOS_CONFIG_KEY = Symbol("kTracingAxiosInterceptor");
 
-export interface TracedAxiosRequestConfig extends AxiosRequestConfig {
+interface TracedAxiosRequestConfig extends AxiosRequestConfig {
   [TRACING_AXIOS_CONFIG_KEY]?: {
     childSpan: Span;
   };
 }
 
-const isAxiosError = (error: Record<string, unknown>) =>
-  error.isAxiosError && error.isAxiosError === true;
-const isErrorStatus = (status: number) => status >= 500;
+const isAxiosError = (error: Record<string, unknown>) => error.isAxiosError && error.isAxiosError === true;
+const isErrorStatus = (status: number) => status >= 400;
 
 @Injectable()
 export class TracingAxiosInterceptor implements OnModuleInit {
-  constructor(
-    private readonly tracingService: TracingService,
-    private readonly httpService: HttpService
-  ) {}
+  constructor(private readonly tracingService: TracingService, private readonly httpService: HttpService) {}
 
   onModuleInit() {
     const axiosRef = this.httpService.axiosRef;
-    axiosRef.interceptors.request.use(
-      this.requestFulfilled(),
-      this.requestRejected()
-    );
-    axiosRef.interceptors.response.use(
-      this.responseFulfilled(),
-      this.responseRejected()
-    );
+    axiosRef.interceptors.request.use(this.requestFulfilled(), this.requestRejected());
+    axiosRef.interceptors.response.use(this.responseFulfilled(), this.responseRejected());
   }
 
-  private requestFulfilled(): (axiosConfig: AxiosRequestConfig) => AxiosRequestConfig {
+  private requestFulfilled(): (axiosConfig: TracedAxiosRequestConfig) => TracedAxiosRequestConfig {
     return (axiosConfig) => {
       try {
         const span = this.tracingService.createChildSpan("http-call");
@@ -71,14 +61,12 @@ export class TracingAxiosInterceptor implements OnModuleInit {
           const span = this.getSpanFromConfig(error.config);
 
           if (span) {
-            span
             span.setTag(Tags.ERROR, true);
             span.setTag(Tags.SAMPLING_PRIORITY, 1);
             span.log({
               event: "error",
               message: error.message,
             });
-            console.log("span finish on request rejected");
             span.finish();
           }
         } catch (tracingError) {
@@ -115,8 +103,9 @@ export class TracingAxiosInterceptor implements OnModuleInit {
 
         throw err;
       } finally {
-        
-        if (span) {console.log("span finish on response fullfiled"); span.finish();} 
+        if (span) {
+          span.finish();
+        }
       }
       return response;
     };
@@ -142,7 +131,6 @@ export class TracingAxiosInterceptor implements OnModuleInit {
               // Networking Error
               span.log({ event: "error", message: "Networking error" });
             }
-            console.log("span finish on response rejected");
             span.finish();
           }
         } catch (tracingError) {
