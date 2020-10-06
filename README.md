@@ -58,7 +58,7 @@ or just call it an root module:
 export class AppModule {}
 ```
 
-### Using trcing for http cals
+### Using tracing for HTTP calls
 
 In your root module
 
@@ -75,4 +75,4 @@ In your root module
 })
 ```
 
-Factory returns config for HttpModule
+Factory is returning config for HttpModule
