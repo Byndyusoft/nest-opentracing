@@ -13,7 +13,7 @@
     "sourceType": "module"
   },
   "rules": {
-    "no-unused-vars": "warn",
+    "no-unused-vars": "error",
     "jest/no-alias-methods": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off"
   }

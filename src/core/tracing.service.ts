@@ -13,11 +13,8 @@ const TRACING_ASYNC_CONTEXT_ROOT_SPAN = "TRACING_ASYNC_CONTEXT_ROOT_SPAN";
 
 const getQueryTags = (query: Record<string, unknown>, prefix: string = null) => {
   return Object.entries(query).reduce((acc, [key, value]) => {
-    let newKey = key;
-    if (prefix) {
-      newKey = `${prefix}.${key}`;
-    }
-    return { ...acc, [newKey]: value };
+    const queryKey = prefix ? `${prefix}.${key}` : key;
+    return { ...acc, [queryKey]: value };
   }, {});
 };
 

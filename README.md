@@ -1,4 +1,5 @@
 # nest-opentracing
+OpenTracing node package for Nest.js with `express` implementation.
 
 ## Instalation
 

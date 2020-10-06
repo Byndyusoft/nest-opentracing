@@ -26,6 +26,11 @@ const defaultIgnoreRoutes = ["metrics", "health", "_healthz", "_readiness", "fav
 
 @Module({})
 export class JaegerTracingModule {
+  /**
+   * @param options
+   * @param options.applyRoutes Default: ["*"]
+   * @param options.ignoreRoutes Default: ["metrics", "health", "_healthz", "_readiness", "favicon.ico", "api-docs"]
+   */
   public static forRoot(options?: {
     applyRoutes?: (string | Type<any> | RouteInfo)[];
     ignoreRoutes?: (string | RouteInfo)[];
@@ -36,7 +41,7 @@ export class JaegerTracingModule {
         OpenTracingModule.forRoot({
           tracer: createJaegerTracer(),
           applyRoutes: options?.applyRoutes,
-          ignoreRoutes: options?.ignoreRoutes ? options.ignoreRoutes : defaultIgnoreRoutes,
+          ignoreRoutes: options?.ignoreRoutes ?? defaultIgnoreRoutes,
         }),
       ],
       exports: [OpenTracingModule],

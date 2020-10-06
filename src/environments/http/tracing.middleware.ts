@@ -1,6 +1,6 @@
 import { Injectable, NestMiddleware } from "@nestjs/common";
 import { Request, Response } from "express";
-import { TracingService, Tags } from "../../core";
+import { TracingService } from "../../core";
 
 @Injectable()
 export class HttpTracingMiddleware implements NestMiddleware {
