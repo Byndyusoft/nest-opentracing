@@ -11,8 +11,8 @@ export class OpenTracingModule {
   public static forRoot(options: {
     tracer: Tracer;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    applyRoutes?: (string | Type<any> | RouteInfo)[];
-    ignoreRoutes?: (string | RouteInfo)[];
+    applyRoutes: (string | Type<any> | RouteInfo)[];
+    ignoreRoutes: (string | RouteInfo)[];
   }): DynamicModule {
     return {
       // Make TracingService available in the whole app
