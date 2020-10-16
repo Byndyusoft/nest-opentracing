@@ -1,78 +1,103 @@
 # nest-opentracing
-OpenTracing node package for Nest.js with `express` implementation.
 
-## Instalation
+Implementation of [Distributed Tracing](https://opentracing.io) for Nest.js modules.
+
+So far only the [express](https://github.com/expressjs/express) framework is supported.
+
+# Usage
+
+## Installing
 
 ```
-npm i nest-opentracing
+npm i nest-opentracing jaeger-client@3.18.1
 ```
 
-## Usage
+## Initialization
 
-In your `app.module` import tracing modules
+Import tracing module in your root module just **once**. 
+
+### [Jaeger](https://github.com/jaegertracing/jaeger-client-node) tracer
 
 ```javascript
-import { JaegerTracingModule } from "nest-opentracing"
+import { JaegerTracingModule } from "nest-opentracing";
 
 @Module({
   imports: [
-    JaegerTracingModule.forRoot()
+    JaegerTracingModule.forRoot({ applyRoutes: ["v1/*"], ignoreRoutes: [] })
   ],
+  controllers: [AppController]
 })
 export class AppModule {}
 ```
 
-TracingModule allows to use custom tracing path scopes
-
-```javascript 
-JaegerTracingModule.forRoot({
-  applyRoutes: ["*"],
-  ignoreRoutes: ["metrics"],
-})
-```
-
-### Defining own opentracing tracer
-
-Create module for your tracer
-
+### Custom tracer
 
 ```javascript
+import { OpenTracingModule } from "nest-opentracing";
 
-const createTracerInstance = () => { ... };
+const someTracerInstance = initSomeTracer(options);
 
-@Module({
-  imports: [OpenTracingModule.forRoot({ tracer: createTracerInstance() })],
-  exports: [OpenTracingModule]
-})
-export class FooTracerModule {}
-```
-
-or just call it an root module:
-
-```javascript
 @Module({
   imports: [
-    OpenTracingModule.forRoot({ tracer: myTracer }),
+    OpenTracingModule.forRoot({ tracer: someTracerInstance, applyRoutes: ["v1/*"], ignoreRoutes: [] })
   ],
+  controllers: [AppController]
 })
 export class AppModule {}
 ```
 
-### Using tracing for HTTP calls
-
-In your root module
+### Tracing Nest.js HttpModule
 
 ```javascript
+import { JaegerTracingModule, TracedHttpModule } from "nest-opentracing";
+
 @Module({
   imports: [
-    JaegerTracingModule.forRoot(),
+    JaegerTracingModule.forRoot({ applyRoutes: [AppController], ignoreRoutes: [] }),
     TracedHttpModule.registerAsync({
       useFactory: async () => ({
         timeout: 2000, // timeout 2000ms for every request throught HttpService
       }),
     })
   ],
+  controllers: [AppController]
 })
+export class AppModule {}
 ```
 
-Factory is returning config for HttpModule
+## Configuration
+
+### Jaeger tracer
+
+Configures by [Jaeger environment variables](https://github.com/jaegertracing/jaeger-client-node#environment-variables) and next variables:
+
+```
+npm_package_version
+NAMESPACE
+NODE_ENV
+```
+
+### Traced HTTP module
+
+`TracedHttpModule` has same initialization interface like a HttpModule.
+
+
+## Async functions tracing
+
+```javascript
+import { TracingService } from "nest-opentracing";
+
+@Controller()
+class AppController {
+  constructor(private readonly TracingService tracingService) {}
+
+  @Get("foo")
+  async bar() {
+    /* some code here */
+
+    const asyncResult = await this.tracingService.traceAsyncFunction(async () => await someAsyncAction("foo", "bar"));
+
+    /* some code here */
+  }
+}
+```
