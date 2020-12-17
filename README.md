@@ -9,7 +9,7 @@ So far only the [express](https://github.com/expressjs/express) framework is sup
 ## Installing
 
 ```
-npm i nest-opentracing jaeger-client@3.18.1
+npm i @byndyusoft/nest-opentracing jaeger-client@3.18.1
 ```
 
 ## Initialization
