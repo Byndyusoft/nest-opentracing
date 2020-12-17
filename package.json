@@ -1,5 +1,5 @@
 {
-  "name": "nest-opentracing",
+  "name": "@byndyusoft/nest-opentracing",
   "version": "1.2.1",
   "description": "Nest.js implementation of opentracing",
   "publishConfig": {
@@ -30,6 +30,7 @@
     "url": "git+https://github.com/Byndyusoft/nest-opentracing.git"
   },
   "keywords": [
+    "byndyusoft",
     "nest",
     "opentracing"
   ],
