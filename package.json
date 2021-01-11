@@ -35,8 +35,7 @@
     "opentracing"
   ],
   "devDependencies": {
-    "@nestjs/common": "7.4.4",
-    "@types/axios": "^0.14.0",
+    "@nestjs/common": "^7.6.5",
     "@types/express": "4.17.8",
     "@types/jaeger-client": "^3.15.4",
     "@types/jest": "^26.0.9",
@@ -49,10 +48,10 @@
     "jest": "^26.4.2",
     "jest-extended": "^0.11.5",
     "prettier": "^2.0.5",
+    "reflect-metadata": "0.1.13",
     "rxjs": "^6.6.3",
     "ts-jest": "^26.3.0",
-    "typescript": "^3.9.3",
-    "reflect-metadata": "0.1.13"
+    "typescript": "^3.9.3"
   },
   "dependencies": {
     "opentracing": "~0.14.4",
@@ -61,7 +60,7 @@
   },
   "peerDependencies": {
     "@nestjs/common": "^7.4.0",
-    "axios": "^0.20.0",
+    "axios": "^0.21.1",
     "express": "^4.17.1"
   },
   "main": "./dist/index.js",
