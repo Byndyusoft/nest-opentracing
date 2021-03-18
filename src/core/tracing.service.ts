@@ -37,7 +37,7 @@ export class TracingService {
     span.setTag(Tags.HTTP_METHOD, method.toUpperCase());
     span.setTag(Tags.HTTP_URL, baseUrl);
     span.addTags(getQueryTags(query, "query"));
-    span.log({ Request: { query, body } });
+    span.log({ request: { query, body } });
 
     return span;
   }
@@ -99,6 +99,10 @@ export class TracingService {
     return () => {
       const statusCode = response.statusCode;
       span.setTag(Tags.HTTP_STATUS_CODE, statusCode);
+
+      const {body} = (response as unknown as Record<string, unknown>);
+
+      span.log({ response: { body } });
 
       if (isCriticalStatusCode(statusCode)) {
         span.setTag(Tags.SAMPLING_PRIORITY, 1);

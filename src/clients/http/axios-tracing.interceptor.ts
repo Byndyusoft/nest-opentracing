@@ -34,6 +34,8 @@ export class TracingAxiosInterceptor implements OnModuleInit {
           childSpan: span,
         };
 
+        span.log({ request: { data: axiosConfig.data, params: axiosConfig.params } });
+
         const tracingHeaders = this.tracingService.getInjectedHeaders(span);
         axiosConfig.headers = { ...axiosConfig.headers, ...tracingHeaders };
 
@@ -86,6 +88,8 @@ export class TracingAxiosInterceptor implements OnModuleInit {
         if (span) {
           span.setTag(Tags.HTTP_STATUS_CODE, response.status);
           span.setTag(Tags.HTTP_METHOD, response.config.method.toUpperCase());
+
+          span.log({ response: { data: response.data } });
 
           if (isErrorStatus(response.status)) {
             span.setTag(Tags.ERROR, true);
