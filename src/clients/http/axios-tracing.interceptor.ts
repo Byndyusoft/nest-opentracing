@@ -29,7 +29,7 @@ export class TracingAxiosInterceptor implements OnModuleInit {
     return (axiosConfig) => {
       try {
         const span = this.tracingService.createChildSpan("http-call");
-        span.setTag(Tags.HTTP_URL, axiosConfig.url);
+        span.setTag(Tags.HTTP_URL, this.getUrl(axiosConfig));
         axiosConfig[TRACING_AXIOS_CONFIG_KEY] = {
           childSpan: span,
         };
@@ -154,5 +154,13 @@ export class TracingAxiosInterceptor implements OnModuleInit {
     }
 
     return null;
+  }
+
+  private getUrl(axiosConfig: AxiosRequestConfig): string {
+    try {
+      return new URL(axiosConfig.url, axiosConfig.baseURL).href;
+    } catch {
+      return axiosConfig.url;
+    }
   }
 }
