@@ -46,6 +46,22 @@ const someTracerInstance = initSomeTracer(options);
 export class AppModule {}
 ```
 
+### Log request/response bodies
+
+```javascript
+import { OpenTracingModule } from "nest-opentracing";
+
+const someTracerInstance = initSomeTracer(options);
+
+@Module({
+  imports: [
+    OpenTracingModule.forRoot({ applyRoutes: ["v1/*"], ignoreRoutes: [], logBodies: true })
+  ],
+  controllers: [AppController]
+})
+export class AppModule {}
+```
+
 ### Tracing Nest.js HttpModule
 
 ```javascript
@@ -53,12 +69,8 @@ import { JaegerTracingModule, TracedHttpModule } from "nest-opentracing";
 
 @Module({
   imports: [
-    JaegerTracingModule.forRoot({ applyRoutes: [AppController], ignoreRoutes: [] }),
-    TracedHttpModule.registerAsync({
-      useFactory: async () => ({
-        timeout: 2000, // timeout 2000ms for every request throught HttpService
-      }),
-    })
+    JaegerTracingModule.forRoot({ applyRoutes: [AppController], ignoreRoutes: [], logBodies: true }),
+    TracedHttpModule.forRoot({ logBodies: true })
   ],
   controllers: [AppController]
 })
@@ -79,7 +91,19 @@ NODE_ENV
 
 ### Traced HTTP module
 
-`TracedHttpModule` has same initialization interface like a HttpModule.
+`TracedHttpModule` can be configured via `forRoot` pattern.
+
+```javascript
+import { JaegerTracingModule, TracedHttpModule } from "nest-opentracing";
+
+@Module({
+  imports: [
+    TracedHttpModule.forRoot({ logBodies: true })
+  ],
+  controllers: [AppController]
+})
+export class AppModule {}
+```
 
 
 ## Async functions tracing
@@ -95,7 +119,7 @@ class AppController {
   async bar() {
     /* some code here */
 
-    const asyncResult = await this.tracingService.traceAsyncFunction(async () => await someAsyncAction("foo", "bar"));
+    const asyncResult = await this.tracingService.traceAsyncFunction("description", async () => await someAsyncAction("foo", "bar"));
 
     /* some code here */
   }
