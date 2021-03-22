@@ -1,8 +1,9 @@
-import { HttpService, Injectable, OnModuleInit } from "@nestjs/common";
+import { HttpService, Inject, Injectable, OnModuleInit } from "@nestjs/common";
 import { AxiosRequestConfig, AxiosResponse } from "axios";
 import { Span, Tags } from "opentracing";
 
 import { TracingService, TracingNotInitializedException } from "../../core";
+import { ITracedHttpModuleOptions } from "./options";
 
 const TRACING_AXIOS_CONFIG_KEY = Symbol("kTracingAxiosInterceptor");
 
@@ -17,7 +18,11 @@ const isErrorStatus = (status: number) => status >= 400;
 
 @Injectable()
 export class TracingAxiosInterceptor implements OnModuleInit {
-  constructor(private readonly tracingService: TracingService, private readonly httpService: HttpService) {}
+  constructor(
+    private readonly tracingService: TracingService,
+    private readonly httpService: HttpService,
+    @Inject("ITracedHttpModuleOptions") private readonly options: ITracedHttpModuleOptions,
+  ) {}
 
   onModuleInit() {
     const axiosRef = this.httpService.axiosRef;
@@ -34,7 +39,11 @@ export class TracingAxiosInterceptor implements OnModuleInit {
           childSpan: span,
         };
 
-        span.log({ request: { data: axiosConfig.data, params: axiosConfig.params } });
+        const requestLog: any = { params: axiosConfig.params };
+        if (this.options.logBodies) {
+          requestLog.data = axiosConfig.data;
+        }
+        span.log({ request: requestLog });
 
         const tracingHeaders = this.tracingService.getInjectedHeaders(span);
         axiosConfig.headers = { ...axiosConfig.headers, ...tracingHeaders };
@@ -89,7 +98,9 @@ export class TracingAxiosInterceptor implements OnModuleInit {
           span.setTag(Tags.HTTP_STATUS_CODE, response.status);
           span.setTag(Tags.HTTP_METHOD, response.config.method.toUpperCase());
 
-          span.log({ response: { data: response.data } });
+          if (this.options.logBodies) {
+            span.log({ response: { data: response.data } });
+          }
 
           if (isErrorStatus(response.status)) {
             span.setTag(Tags.ERROR, true);

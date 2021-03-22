@@ -9,12 +9,14 @@ export class HttpTracingMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: () => void) {
     const rootSpan = this.tracingService.getSpanFromRequest(req);
 
+    this.tracingService.interceptReponseBody(res);
+
     this.tracingService.setRootSpan(rootSpan);
     const finishSpanAction = this.tracingService.getFinishSpanAction(rootSpan, res);
 
     res.on("close", finishSpanAction);
     res.on("finish", finishSpanAction);
-    
+
     next();
   }
 }

@@ -28,6 +28,7 @@ export class JaegerTracingModule {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     applyRoutes: (string | Type<any> | RouteInfo)[];
     ignoreRoutes: (string | RouteInfo)[];
+    logBodies?: boolean;
   }): DynamicModule {
     return {
       module: JaegerTracingModule,
