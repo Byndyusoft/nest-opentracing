@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { Request, Response } from "express";
 
 import { Span, Tracer, FORMAT_HTTP_HEADERS, Tags, initGlobalTracer } from "opentracing";
@@ -8,6 +8,7 @@ import { TracingNotInitializedException } from "./tracing-not-initialized.except
 export { TracingNotInitializedException } from "./tracing-not-initialized.exception";
 
 import { AsyncContext, UnknownAsyncContextException } from "../async-context";
+import { ITracingCoreModuleOptions } from "./options";
 
 const TRACING_ASYNC_CONTEXT_ROOT_SPAN = "TRACING_ASYNC_CONTEXT_ROOT_SPAN";
 
@@ -22,13 +23,17 @@ const isCriticalStatusCode = (statusCode: number) => statusCode >= 500;
 
 @Injectable()
 export class TracingService {
-  constructor(private readonly tracer: Tracer, private readonly asyncContext: AsyncContext) {
+  constructor(
+    private readonly tracer: Tracer,
+    private readonly asyncContext: AsyncContext,
+    @Inject("ITracingCoreModuleOptions") private readonly options: ITracingCoreModuleOptions,
+  ) {
     initGlobalTracer(tracer);
   }
 
-  public getSpanFromRequest(request: Request) {
+  public getSpanFromRequest(req: Request) {
     const tracer = this.tracer;
-    const { headers, baseUrl, method, query, body } = request;
+    const { headers, baseUrl, method, query, body } = req;
 
     const parentSpanContext = tracer.extract(FORMAT_HTTP_HEADERS, headers);
 
@@ -37,7 +42,10 @@ export class TracingService {
     span.setTag(Tags.HTTP_METHOD, method.toUpperCase());
     span.setTag(Tags.HTTP_URL, baseUrl);
     span.addTags(getQueryTags(query, "query"));
-    span.log({ Request: { query, body } });
+
+    if (this.options.logBodies) {
+      span.log({ request: { body } });
+    }
 
     return span;
   }
@@ -100,6 +108,11 @@ export class TracingService {
       const statusCode = response.statusCode;
       span.setTag(Tags.HTTP_STATUS_CODE, statusCode);
 
+      if (this.options.logBodies) {
+        const { body } = (response as unknown) as Record<string, unknown>;
+        span.log({ response: { body } });
+      }
+
       if (isCriticalStatusCode(statusCode)) {
         span.setTag(Tags.SAMPLING_PRIORITY, 1);
         span.setTag(Tags.ERROR, true);
@@ -107,5 +120,25 @@ export class TracingService {
 
       span.finish();
     };
+  }
+
+  public interceptReponseBody(res: Response) {
+    const [oldSend] = [res.send];
+
+    const response = (res as unknown) as Record<string, unknown>;
+
+    response.send = function (...args) {
+      const body = args.length > 0 ? args[0] : undefined;
+      response.body = TracingService.toJson(body);
+      return oldSend.apply(res, args);
+    };
+  }
+
+  private static toJson(data: any) {
+    try{
+      return data ? JSON.parse(data) : data;
+    } catch{
+      return data;
+    }
   }
 }

@@ -1,8 +1,9 @@
-import { HttpService, Injectable, OnModuleInit } from "@nestjs/common";
+import { HttpService, Inject, Injectable, OnModuleInit } from "@nestjs/common";
 import { AxiosRequestConfig, AxiosResponse } from "axios";
 import { Span, Tags } from "opentracing";
 
 import { TracingService, TracingNotInitializedException } from "../../core";
+import { ITracedHttpModuleOptions } from "./options";
 
 const TRACING_AXIOS_CONFIG_KEY = Symbol("kTracingAxiosInterceptor");
 
@@ -17,7 +18,11 @@ const isErrorStatus = (status: number) => status >= 400;
 
 @Injectable()
 export class TracingAxiosInterceptor implements OnModuleInit {
-  constructor(private readonly tracingService: TracingService, private readonly httpService: HttpService) {}
+  constructor(
+    private readonly tracingService: TracingService,
+    private readonly httpService: HttpService,
+    @Inject("ITracedHttpModuleOptions") private readonly options: ITracedHttpModuleOptions,
+  ) {}
 
   onModuleInit() {
     const axiosRef = this.httpService.axiosRef;
@@ -29,10 +34,16 @@ export class TracingAxiosInterceptor implements OnModuleInit {
     return (axiosConfig) => {
       try {
         const span = this.tracingService.createChildSpan("http-call");
-        span.setTag(Tags.HTTP_URL, axiosConfig.url);
+        span.setTag(Tags.HTTP_URL, this.getUrl(axiosConfig));
         axiosConfig[TRACING_AXIOS_CONFIG_KEY] = {
           childSpan: span,
         };
+
+        const requestLog: any = { params: axiosConfig.params };
+        if (this.options.logBodies) {
+          requestLog.data = axiosConfig.data;
+        }
+        span.log({ request: requestLog });
 
         const tracingHeaders = this.tracingService.getInjectedHeaders(span);
         axiosConfig.headers = { ...axiosConfig.headers, ...tracingHeaders };
@@ -86,6 +97,10 @@ export class TracingAxiosInterceptor implements OnModuleInit {
         if (span) {
           span.setTag(Tags.HTTP_STATUS_CODE, response.status);
           span.setTag(Tags.HTTP_METHOD, response.config.method.toUpperCase());
+
+          if (this.options.logBodies) {
+            span.log({ response: { data: response.data } });
+          }
 
           if (isErrorStatus(response.status)) {
             span.setTag(Tags.ERROR, true);
@@ -150,5 +165,13 @@ export class TracingAxiosInterceptor implements OnModuleInit {
     }
 
     return null;
+  }
+
+  private getUrl(axiosConfig: AxiosRequestConfig): string {
+    try {
+      return new URL(axiosConfig.url, axiosConfig.baseURL).href;
+    } catch {
+      return axiosConfig.url;
+    }
   }
 }
