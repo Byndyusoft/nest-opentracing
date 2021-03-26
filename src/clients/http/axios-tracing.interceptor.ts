@@ -1,7 +1,7 @@
 import { HttpService, Inject, Injectable, OnModuleInit } from "@nestjs/common";
-import { AxiosRequestConfig, AxiosResponse } from "axios";
+import { AxiosRequestConfig, AxiosResponse, AxiosError } from "axios";
 import { Span, Tags } from "opentracing";
-
+import { BodyService } from "../../core/body.service";
 import { TracingService, TracingNotInitializedException } from "../../core";
 import { ITracedHttpModuleOptions } from "./options";
 
@@ -41,7 +41,7 @@ export class TracingAxiosInterceptor implements OnModuleInit {
 
         const requestLog: any = { params: axiosConfig.params };
         if (this.options.logBodies) {
-          requestLog.data = axiosConfig.data;
+          requestLog.body = BodyService.getBody(axiosConfig.data);
         }
         span.log({ request: requestLog });
 
@@ -78,6 +78,7 @@ export class TracingAxiosInterceptor implements OnModuleInit {
               event: "error",
               message: error.message,
             });
+
             span.finish();
           }
         } catch (tracingError) {
@@ -99,7 +100,7 @@ export class TracingAxiosInterceptor implements OnModuleInit {
           span.setTag(Tags.HTTP_METHOD, response.config.method.toUpperCase());
 
           if (this.options.logBodies) {
-            span.log({ response: { data: response.data } });
+            span.log({ response: { body: BodyService.getBody(response.data) } });
           }
 
           if (isErrorStatus(response.status)) {
@@ -132,17 +133,22 @@ export class TracingAxiosInterceptor implements OnModuleInit {
     // Close Span
     return (error) => {
       if (isAxiosError(error)) {
+        const axiosError = error as AxiosError;
         try {
-          const span = this.getSpanFromConfig(error.config);
+          const span = this.getSpanFromConfig(axiosError.config);
 
           if (span) {
             span.setTag(Tags.ERROR, true);
             span.setTag(Tags.SAMPLING_PRIORITY, 1);
             span.setTag(Tags.HTTP_METHOD, error.config.method);
 
-            if (error.request && error.response) {
-              span.setTag(Tags.HTTP_STATUS_CODE, error.response.status);
-            } else if (error.config) {
+            if (axiosError.request && axiosError.response) {
+              span.setTag(Tags.HTTP_STATUS_CODE, axiosError.response.status);
+
+              if (this.options.logBodies) {
+                span.log({ response: { body: BodyService.getBody(axiosError.response.data) } });
+              }
+            } else if (axiosError.config) {
               // Networking Error
               span.log({ event: "error", message: "Networking error" });
             }
