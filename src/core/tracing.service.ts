@@ -9,6 +9,7 @@ export { TracingNotInitializedException } from "./tracing-not-initialized.except
 
 import { AsyncContext, UnknownAsyncContextException } from "../async-context";
 import { ITracingCoreModuleOptions } from "./options";
+import { BodyService } from "./body.service";
 
 const TRACING_ASYNC_CONTEXT_ROOT_SPAN = "TRACING_ASYNC_CONTEXT_ROOT_SPAN";
 
@@ -44,7 +45,7 @@ export class TracingService {
     span.addTags(getQueryTags(query, "query"));
 
     if (this.options.logBodies) {
-      span.log({ request: { body } });
+      span.log({ request: { body: BodyService.getBody(body) } });
     }
 
     return span;
@@ -110,7 +111,7 @@ export class TracingService {
 
       if (this.options.logBodies) {
         const { body } = (response as unknown) as Record<string, unknown>;
-        span.log({ response: { body } });
+        span.log({ response: { body: BodyService.getBody(body) } });
       }
 
       if (isCriticalStatusCode(statusCode)) {
@@ -129,16 +130,8 @@ export class TracingService {
 
     response.send = function (...args) {
       const body = args.length > 0 ? args[0] : undefined;
-      response.body = TracingService.toJson(body);
+      response.body = BodyService.getBody(body);
       return oldSend.apply(res, args);
     };
-  }
-
-  private static toJson(data: any) {
-    try{
-      return data ? JSON.parse(data) : data;
-    } catch{
-      return data;
-    }
   }
 }
