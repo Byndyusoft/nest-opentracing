@@ -23,7 +23,7 @@ export class TracingCoreModule {
       providers: [
         {
           provide: Tracer,
-          useFactory: () => options.tracer,
+          useFactory: () => options.tracerFactory?.() ?? options.tracer,
         },
         {
           provide: "ITracingCoreModuleOptions",
