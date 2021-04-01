@@ -46,6 +46,24 @@ const someTracerInstance = initSomeTracer(options);
 export class AppModule {}
 ```
 
+or via factory
+
+```javascript
+import { OpenTracingModule } from "nest-opentracing";
+
+@Module({
+  imports: [
+    OpenTracingModule.forRoot({
+      tracerFactory: () => initSomeTracer(options),
+      applyRoutes: ["v1/*"],
+      ignoreRoutes: [],
+    }),
+  ],
+  controllers: [AppController],
+})
+export class AppModule {}
+```
+
 ### Log request/response bodies
 
 ```javascript
