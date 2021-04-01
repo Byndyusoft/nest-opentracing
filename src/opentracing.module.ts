@@ -9,7 +9,8 @@ import { HttpEnvironmentModule } from "./environments";
 })
 export class OpenTracingModule {
   public static forRoot(options: {
-    tracer: Tracer;
+    tracer?: Tracer;
+    tracerFactory?: () => Tracer;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     applyRoutes: (string | Type<any> | RouteInfo)[];
     ignoreRoutes: (string | RouteInfo)[];
