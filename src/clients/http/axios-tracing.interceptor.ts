@@ -4,6 +4,7 @@ import { Span, Tags } from "opentracing";
 import { BodyService } from "../../core/body.service";
 import { TracingService, TracingNotInitializedException } from "../../core";
 import { ITracedHttpModuleOptions } from "./options";
+import * as urljoin from "url-join";
 
 const TRACING_AXIOS_CONFIG_KEY = Symbol("kTracingAxiosInterceptor");
 
@@ -175,7 +176,8 @@ export class TracingAxiosInterceptor implements OnModuleInit {
 
   private getUrl(axiosConfig: AxiosRequestConfig): string {
     try {
-      return new URL(axiosConfig.url, axiosConfig.baseURL).href;
+      const parts = [axiosConfig.baseURL, axiosConfig.url].filter((x) => !!x);
+      return urljoin(...parts);
     } catch {
       return axiosConfig.url;
     }
