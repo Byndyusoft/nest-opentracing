@@ -1,6 +1,6 @@
 {
   "name": "@byndyusoft/nest-opentracing",
-  "version": "1.5.0",
+  "version": "2.0.0",
   "description": "Nest.js implementation of opentracing",
   "publishConfig": {
     "access": "public"
@@ -35,7 +35,8 @@
     "opentracing"
   ],
   "devDependencies": {
-    "@nestjs/common": "7.4.4",
+    "@nestjs/axios": "^0.0.1",
+    "@nestjs/common": "^8.0.2",
     "@types/axios": "^0.14.0",
     "@types/express": "4.17.8",
     "@types/jaeger-client": "^3.15.4",
@@ -49,9 +50,9 @@
     "jest": "^26.4.2",
     "jest-extended": "^0.11.5",
     "prettier": "^2.0.5",
-    "rxjs": "^6.6.3",
+    "rxjs": "^7.2.0",
     "ts-jest": "^26.3.0",
-    "typescript": "^3.9.3",
+    "typescript": "^4.3.5",
     "reflect-metadata": "0.1.13"
   },
   "dependencies": {
@@ -60,7 +61,8 @@
     "prom-client": "~11.3.0"
   },
   "peerDependencies": {
-    "@nestjs/common": "^7.4.0",
+    "@nestjs/axios": "^0.0.1",
+    "@nestjs/common": "^8.0.2",
     "axios": "^0.20.0",
     "express": "^4.17.1"
   },
