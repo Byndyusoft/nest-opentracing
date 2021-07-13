@@ -1,4 +1,5 @@
-import { HttpService, Inject, Injectable, OnModuleInit } from "@nestjs/common";
+import { HttpService } from "@nestjs/axios";
+import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
 import { AxiosRequestConfig, AxiosResponse, AxiosError } from "axios";
 import { Span, Tags } from "opentracing";
 import { BodyService } from "../../core/body.service";
