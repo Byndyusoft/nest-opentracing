@@ -1,7 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { Request, Response } from "express";
 
-import { Span, Tracer, FORMAT_HTTP_HEADERS, Tags, initGlobalTracer } from "opentracing";
+import { Span, Tracer, FORMAT_HTTP_HEADERS, Tags, initGlobalTracer, SpanContext } from "opentracing";
 export { Span, Tracer, Tags } from "opentracing";
 
 import { TracingNotInitializedException } from "./tracing-not-initialized.exception";
@@ -48,6 +48,12 @@ export class TracingService {
       span.log({ request: { body: BodyService.getBody(body) } });
     }
 
+    return span;
+  }
+
+  public initRootSpan(spanName: string, spanContext?: SpanContext): Span {
+    const span = this.tracer.startSpan(spanName, { childOf: spanContext });
+    this.setRootSpan(span);
     return span;
   }
 
