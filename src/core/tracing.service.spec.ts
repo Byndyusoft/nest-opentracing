@@ -16,7 +16,7 @@ beforeEach(async () => {
 it.todo("injects trace id to HTTP headers");
 it.todo("extracts span context from Express.js request");
 
-it("sets rootSpan in AsyncContext", async () => {
+it("saves rootSpan in AsyncContext", async () => {
   const tracingService = new TracingService(tracer, asyncContext, {});
   const rootSpan = tracingService.initRootSpan("root span");
   const span = asyncContext.get<string, Span>("TRACING_ASYNC_CONTEXT_ROOT_SPAN");
@@ -41,21 +41,30 @@ it("creates child span of rootSpan", async () => {
 });
 
 describe("trace async function", () => {
+  describe("when no root span", () => {
+    it("creates root span", async () => {
+      const tracingService = new TracingService(tracer, asyncContext, {});
+      await tracingService.traceAsyncFunction("root async func", async (span) => {
+        expect(span).toEqual(tracingService.getRootSpan());
+      });
+    });
+  });
+
   it("creates child span of rootSpan", async () => {
     const tracingService = new TracingService(tracer, asyncContext, {});
     const rootSpan = tracingService.initRootSpan("root span");
 
-    tracingService.traceAsyncFunction("child async func", async (span) => {
+    await tracingService.traceAsyncFunction("child async func", async (span) => {
       expect(span.context().toTraceId()).toEqual(rootSpan.context().toTraceId());
     });
   });
 
-  it("executes async function", () => {
+  it("executes async function", async () => {
     const tracingService = new TracingService(tracer, asyncContext, {});
     tracingService.initRootSpan("root span");
     const callback = jest.fn();
 
-    tracingService.traceAsyncFunction("child async func", async (span) => {
+    await tracingService.traceAsyncFunction("child async func", async (span) => {
       callback(span);
     });
 

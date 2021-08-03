@@ -91,8 +91,19 @@ export class TracingService {
     return headers;
   }
 
-  async traceAsyncFunction<T>(spanName: string, func: (span: Span) => Promise<T>): Promise<T> {
-    const span = this.createChildSpan(spanName);
+  public createAsyncContext(): void {
+    this.asyncContext.run(() => "");
+  }
+
+  public async traceAsyncFunction<T>(spanName: string, func: (span: Span) => Promise<T>): Promise<T> {
+    const rootSpan = this.getRootSpan();
+    let span: Span;
+    if (!rootSpan) {
+      span = this.initRootSpan(spanName);
+    } else {
+      span = this.createChildSpan(spanName);
+    }
+
     try {
       return await func(span);
     } catch (error) {
