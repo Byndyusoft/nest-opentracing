@@ -1,5 +1,6 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, OnApplicationShutdown } from "@nestjs/common";
 import { Request, Response } from "express";
+import { JaegerTracer } from "jaeger-client";
 
 import { Span, Tracer, FORMAT_HTTP_HEADERS, Tags, initGlobalTracer, SpanContext } from "opentracing";
 export { Span, Tracer, Tags } from "opentracing";
@@ -23,9 +24,9 @@ const getQueryTags = (query: Record<string, unknown>, prefix: string = null) => 
 const isCriticalStatusCode = (statusCode: number) => statusCode >= 500;
 
 @Injectable()
-export class TracingService {
+export class TracingService implements OnApplicationShutdown {
   constructor(
-    private readonly tracer: Tracer,
+    @Inject(Tracer) private readonly tracer: JaegerTracer | Tracer,
     private readonly asyncContext: AsyncContext,
     @Inject("ITracingCoreModuleOptions") private readonly options: ITracingCoreModuleOptions,
   ) {
@@ -150,5 +151,15 @@ export class TracingService {
       response.body = BodyService.getBody(body);
       return oldSend.apply(res, args);
     };
+  }
+
+  public onApplicationShutdown(): Promise<void> {
+    return new Promise((resolve) => {
+      if ("close" in this.tracer) {
+        this.tracer.close(resolve);
+      } else {
+        resolve();
+      }
+    });
   }
 }
