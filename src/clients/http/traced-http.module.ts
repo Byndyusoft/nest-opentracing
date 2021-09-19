@@ -1,3 +1,4 @@
+import { DynamicModuleHelper, TRegisterAsyncOptions } from "@byndyusoft/nest-dynamic-module";
 import { HttpModule } from "@nestjs/axios";
 import { DynamicModule, Module } from "@nestjs/common";
 import { TracingAxiosInterceptor } from "./axios-tracing.interceptor";
@@ -8,17 +9,20 @@ const defaultOptions: ITracedHttpModuleOptions = {
 };
 
 @Module({
-  imports: [HttpModule],
   providers: [TracingAxiosInterceptor],
-  exports: [TracingAxiosInterceptor],
 })
 export class TracedHttpModule {
+  /**
+   * @deprecated Use registerAsync instead
+   * @param options
+   */
   public static forRoot(options?: ITracedHttpModuleOptions): DynamicModule {
     options = Object.assign({}, defaultOptions, options);
 
     return {
       module: TracedHttpModule,
       global: true,
+      imports: [HttpModule],
       providers: [
         {
           provide: "ITracedHttpModuleOptions",
@@ -26,5 +30,19 @@ export class TracedHttpModule {
         },
       ],
     };
+  }
+
+  public static registerAsync(options?: TRegisterAsyncOptions<ITracedHttpModuleOptions>): DynamicModule {
+    return DynamicModuleHelper.registerAsync(
+      {
+        module: TracedHttpModule,
+      },
+      "ITracedHttpModuleOptions",
+      {
+        ...options,
+        imports: options?.imports && options.imports.length > 0 ? [] : [HttpModule],
+        useFactory: async (...args: never[]) => Object.assign({}, defaultOptions, await options?.useFactory?.(...args)),
+      },
+    );
   }
 }

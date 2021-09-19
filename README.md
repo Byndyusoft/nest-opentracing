@@ -9,54 +9,38 @@ So far only the [express](https://github.com/expressjs/express) framework is sup
 ## Installing
 
 ```
-npm i @byndyusoft/nest-opentracing jaeger-client@3.18.1
+npm i @byndyusoft/nest-opentracing @nestjs/axios @nestjs/common axios express
 ```
 
 ## Initialization
 
-Import tracing module in your root module just **once**. 
+Import tracing module in your root module just **once**.
 
 ### [Jaeger](https://github.com/jaegertracing/jaeger-client-node) tracer
 
-```javascript
-import { JaegerTracingModule } from "nest-opentracing";
+```typescript
+import { JaegerTracingModule } from "@byndyusoft/nest-opentracing";
 
 @Module({
-  imports: [
-    JaegerTracingModule.forRoot({ applyRoutes: ["v1/*"], ignoreRoutes: [] })
-  ],
-  controllers: [AppController]
+  imports: [JaegerTracingModule.forRoot({ applyRoutes: ["v1/*"], ignoreRoutes: [] })],
+  controllers: [AppController],
 })
 export class AppModule {}
 ```
 
 ### Custom tracer
 
-```javascript
-import { OpenTracingModule } from "nest-opentracing";
-
-const someTracerInstance = initSomeTracer(options);
+```typescript
+import { OpenTracingModule } from "@byndyusoft/nest-opentracing";
 
 @Module({
   imports: [
-    OpenTracingModule.forRoot({ tracer: someTracerInstance, applyRoutes: ["v1/*"], ignoreRoutes: [] })
-  ],
-  controllers: [AppController]
-})
-export class AppModule {}
-```
-
-or via factory
-
-```javascript
-import { OpenTracingModule } from "nest-opentracing";
-
-@Module({
-  imports: [
-    OpenTracingModule.forRoot({
-      tracerFactory: () => initSomeTracer(options),
-      applyRoutes: ["v1/*"],
-      ignoreRoutes: [],
+    OpenTracingModule.forRootAsync({
+      useFactory: () => ({
+        tracer: initSomeTracer(),
+        applyRoutes: ["v1/*"],
+        ignoreRoutes: [],
+      }),
     }),
   ],
   controllers: [AppController],
@@ -66,31 +50,39 @@ export class AppModule {}
 
 ### Log request/response bodies
 
-```javascript
-import { OpenTracingModule } from "nest-opentracing";
-
-const someTracerInstance = initSomeTracer(options);
+```typescript
+import { OpenTracingModule } from "@byndyusoft/nest-opentracing";
 
 @Module({
   imports: [
-    OpenTracingModule.forRoot({ applyRoutes: ["v1/*"], ignoreRoutes: [], logBodies: true })
+    OpenTracingModule.forRootAsync({
+      useFactory: () => ({
+        applyRoutes: ["v1/*"],
+        ignoreRoutes: [],
+        logBodies: true,
+      }),
+    }),
   ],
-  controllers: [AppController]
+  controllers: [AppController],
 })
 export class AppModule {}
 ```
 
 ### Tracing Nest.js HttpModule
 
-```javascript
-import { JaegerTracingModule, TracedHttpModule } from "nest-opentracing";
+```typescript
+import { JaegerTracingModule, TracedHttpModule } from "@byndyusoft/nest-opentracing";
 
 @Module({
   imports: [
     JaegerTracingModule.forRoot({ applyRoutes: [AppController], ignoreRoutes: [], logBodies: true }),
-    TracedHttpModule.forRoot({ logBodies: true })
+    TracedHttpModule.registerAsync({
+      useFactory: () => ({
+        logBodies: true,
+      }),
+    }),
   ],
-  controllers: [AppController]
+  controllers: [AppController],
 })
 export class AppModule {}
 ```
@@ -109,35 +101,41 @@ NODE_ENV
 
 ### Traced HTTP module
 
-`TracedHttpModule` can be configured via `forRoot` pattern.
+`TracedHttpModule` can be configured via `registerAsync` pattern.
 
-```javascript
-import { JaegerTracingModule, TracedHttpModule } from "nest-opentracing";
+```typescript
+import { JaegerTracingModule, TracedHttpModule } from "@byndyusoft/nest-opentracing";
 
 @Module({
   imports: [
-    TracedHttpModule.forRoot({ logBodies: true })
+    TracedHttpModule.registerAsync({
+      useFactory: () => ({
+        logBodies: true,
+      }),
+    }),
   ],
-  controllers: [AppController]
+  controllers: [AppController],
 })
 export class AppModule {}
 ```
 
-
 ## Async functions tracing
 
-```javascript
-import { TracingService } from "nest-opentracing";
+```typescript
+import { TracingService } from "@byndyusoft/nest-opentracing";
 
 @Controller()
 class AppController {
-  constructor(private readonly TracingService tracingService) {}
+  constructor(private readonly tracingService: TracingService) {}
 
   @Get("foo")
   async bar() {
     /* some code here */
 
-    const asyncResult = await this.tracingService.traceAsyncFunction("description", async () => await someAsyncAction("foo", "bar"));
+    const asyncResult = await this.tracingService.traceAsyncFunction(
+      "description",
+      async () => await someAsyncAction("foo", "bar"),
+    );
 
     /* some code here */
   }
