@@ -1,3 +1,4 @@
+import { DynamicModuleHelper, TRegisterAsyncOptions } from "@byndyusoft/nest-dynamic-module";
 import { DynamicModule, Module } from "@nestjs/common";
 import { AsyncContextModule } from "../async-context";
 import { ITracingCoreModuleOptions } from "./options";
@@ -15,6 +16,10 @@ const defaultOptions: ITracingCoreModuleOptions = {
   exports: [TracingService],
 })
 export class TracingCoreModule {
+  /**
+   * @deprecated Use TracingCoreModule.forRootAsync instead
+   * @param options
+   */
   static forRoot(options?: ITracingCoreModuleOptions): DynamicModule {
     options = Object.assign({}, defaultOptions, options);
 
@@ -31,5 +36,25 @@ export class TracingCoreModule {
         },
       ],
     };
+  }
+
+  static forRootAsync(options?: TRegisterAsyncOptions<ITracingCoreModuleOptions>): DynamicModule {
+    return DynamicModuleHelper.registerAsync(
+      {
+        module: TracingCoreModule,
+        providers: [
+          {
+            provide: Tracer,
+            inject: ["ITracingCoreModuleOptions"],
+            useFactory: (tracingCoreModuleOptions: ITracingCoreModuleOptions) => tracingCoreModuleOptions.tracer,
+          },
+        ],
+      },
+      "ITracingCoreModuleOptions",
+      {
+        ...options,
+        useFactory: async (...args: never[]) => Object.assign({}, defaultOptions, await options?.useFactory?.(...args)),
+      },
+    );
   }
 }
