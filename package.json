@@ -1,6 +1,6 @@
 {
   "name": "@byndyusoft/nest-opentracing",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Nest.js implementation of opentracing",
   "publishConfig": {
     "access": "public"
