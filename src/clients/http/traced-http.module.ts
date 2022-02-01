@@ -36,11 +36,11 @@ export class TracedHttpModule {
     return DynamicModuleHelper.registerAsync(
       {
         module: TracedHttpModule,
+        imports: options?.imports && options.imports.length > 0 ? [] : [HttpModule],
       },
       "ITracedHttpModuleOptions",
       {
         ...options,
-        imports: options?.imports && options.imports.length > 0 ? [] : [HttpModule],
         useFactory: async (...args: never[]) => Object.assign({}, defaultOptions, await options?.useFactory?.(...args)),
       },
     );
