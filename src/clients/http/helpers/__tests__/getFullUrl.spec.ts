@@ -5,8 +5,8 @@ describe("concatUlr", () => {
     ["http://test.com/temp", "/api/call"],
     ["http://test.com/temp", "api/call"],
     ["http://test.com/temp/", "/api/call"],
-    ["http://test.com/temp/", "/api/call/"],
-    ["http://test.com", "temp/api/call/"],
+    ["http://test.com", "temp/api/call"],
+    ["", "http://test.com/temp/api/call"],
   ];
 
   it.each(args)(`should return full url from %s and %s`, (baseUrl: string, url: string) => {
@@ -22,9 +22,5 @@ describe("concatUlr", () => {
     const result = getFullUrl(baseUrl, url);
 
     expect(result).toEqual("http://test.com/temp/api/call?param1=1&param2=http://test.com/result");
-  });
-
-  it("should throw an error", () => {
-    expect(() => getFullUrl("", "http://test.com/temp/api/call")).toThrowError();
   });
 });
