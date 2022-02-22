@@ -1,6 +1,6 @@
 {
   "name": "@byndyusoft/nest-opentracing",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "description": "Nest.js implementation of opentracing",
   "publishConfig": {
     "access": "public"
@@ -59,7 +59,8 @@
     "@byndyusoft/nest-dynamic-module": "^1.0.0",
     "jaeger-client": "~3.18.1",
     "opentracing": "~0.14.4",
-    "prom-client": "~11.3.0"
+    "prom-client": "~11.3.0",
+    "url-join": "^4.0.1"
   },
   "peerDependencies": {
     "@nestjs/axios": "^0.0.1",
