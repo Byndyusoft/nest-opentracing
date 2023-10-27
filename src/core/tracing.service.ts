@@ -11,6 +11,7 @@ export { TracingNotInitializedException } from "./tracing-not-initialized.except
 import { AsyncContext, UnknownAsyncContextException } from "../async-context";
 import { ITracingCoreModuleOptions } from "./options";
 import { BodyService } from "./body.service";
+import { TraceContextBuilder } from "./trace-context.builder";
 
 const TRACING_ASYNC_CONTEXT_ROOT_SPAN = "TRACING_ASYNC_CONTEXT_ROOT_SPAN";
 
@@ -31,6 +32,10 @@ export class TracingService implements OnApplicationShutdown {
     @Inject("ITracingCoreModuleOptions") private readonly options: ITracingCoreModuleOptions,
   ) {
     initGlobalTracer(tracer);
+  }
+
+  public traceContextBuilder(): TraceContextBuilder {
+    return new TraceContextBuilder(undefined);
   }
 
   public getSpanFromRequest(req: Request) {
@@ -128,7 +133,7 @@ export class TracingService implements OnApplicationShutdown {
       span.setTag(Tags.HTTP_STATUS_CODE, statusCode);
 
       if (this.options.logBodies) {
-        const { body } = (response as unknown) as Record<string, unknown>;
+        const { body } = response as unknown as Record<string, unknown>;
         span.log({ response: { body: BodyService.getBody(body) } });
       }
 
@@ -144,7 +149,7 @@ export class TracingService implements OnApplicationShutdown {
   public interceptReponseBody(res: Response) {
     const [oldSend] = [res.send];
 
-    const response = (res as unknown) as Record<string, unknown>;
+    const response = res as unknown as Record<string, unknown>;
 
     response.send = function (...args) {
       const body = args.length > 0 ? args[0] : undefined;
