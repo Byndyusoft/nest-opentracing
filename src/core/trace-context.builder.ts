@@ -9,7 +9,7 @@ export class TraceContextBuilder {
   private sampled = true;
   private spanId = "";
   private traceId = "";
-  private parentSpanId: string;
+  private parentId: string;
 
   constructor(private readonly tracer?: JaegerTracer | Tracer) {}
 
@@ -25,8 +25,14 @@ export class TraceContextBuilder {
     return this;
   }
 
-  public setParentSpanId(parentSpanId: string): TraceContextBuilder {
-    this.parentSpanId = parentSpanId;
+  public setParentId(parentId: string): TraceContextBuilder {
+    this.parentId = parentId;
+
+    return this;
+  }
+
+  public setSampled(sampled: boolean): TraceContextBuilder {
+    this.sampled = sampled;
 
     return this;
   }
@@ -38,9 +44,9 @@ export class TraceContextBuilder {
   }
 
   private buildTracerState(): string {
-    const parentSpanId = this.parentSpanId ?? this.traceId;
+    const parentId = this.parentId ?? this.traceId;
     const sampledFlag = this.sampled ? "1" : "0";
 
-    return `${this.traceId}:${this.spanId}:${parentSpanId}:${sampledFlag}`;
+    return `${this.traceId}:${this.spanId}:${parentId}:${sampledFlag}`;
   }
 }
