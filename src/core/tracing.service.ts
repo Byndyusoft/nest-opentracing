@@ -35,7 +35,7 @@ export class TracingService implements OnApplicationShutdown {
   }
 
   public traceContextBuilder(): TraceContextBuilder {
-    return new TraceContextBuilder(undefined);
+    return new TraceContextBuilder(this.tracer);
   }
 
   public getSpanFromRequest(req: Request) {
