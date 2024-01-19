@@ -6,16 +6,15 @@ import { RouteInfo, Type } from "@nestjs/common/interfaces";
 import { OpenTracingModule } from "./opentracing.module";
 
 const createJaegerTracer = () => {
-  const serviceName = process.env.npm_package_name;
   return initTracerFromEnv(
     {
-      serviceName,
+      serviceName: process.env.npm_package_name,
     },
     {
       tags: {
-        [`${serviceName}.hostName`]: os.hostname(),
-        [`${serviceName}.version`]: process.env.npm_package_version,
-        [`${serviceName}.environment`]: process.env.NAMESPACE || process.env.NODE_ENV,
+        hostname: os.hostname(),
+        version: process.env.npm_package_version,
+        environment: process.env.NAMESPACE || process.env.NODE_ENV,
       },
       metrics: new PrometheusMetricsFactory(prometheusClient, ""),
     },
