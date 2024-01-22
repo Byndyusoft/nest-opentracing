@@ -4,6 +4,7 @@ import { JaegerTracer } from "jaeger-client";
 
 import { Span, Tracer, FORMAT_HTTP_HEADERS, Tags, initGlobalTracer, SpanContext } from "opentracing";
 export { Span, Tracer, Tags } from "opentracing";
+import UrlValueParser = require("url-value-parser");
 
 import { TracingNotInitializedException } from "./tracing-not-initialized.exception";
 export { TracingNotInitializedException } from "./tracing-not-initialized.exception";
@@ -12,6 +13,8 @@ import { AsyncContext, UnknownAsyncContextException } from "../async-context";
 import { ITracingCoreModuleOptions } from "./options";
 import { BodyService } from "./body.service";
 import { TraceContextBuilder } from "./trace-context.builder";
+
+const urlParser = new UrlValueParser({ extraMasks: [/^(?!v\d$).*\d+.*$/] });
 
 const TRACING_ASYNC_CONTEXT_ROOT_SPAN = "TRACING_ASYNC_CONTEXT_ROOT_SPAN";
 
@@ -42,12 +45,20 @@ export class TracingService implements OnApplicationShutdown {
     const tracer = this.tracer;
     const { headers, baseUrl, method, query, body } = req;
 
+    const normalizedBaseUrl = urlParser.replacePathValues(baseUrl, "#val");
+    const pathValues = urlParser.parsePathValues(baseUrl);
+
     const parentSpanContext = tracer.extract(FORMAT_HTTP_HEADERS, headers);
 
-    const span = tracer.startSpan(baseUrl, { childOf: parentSpanContext });
+    const span = tracer.startSpan(normalizedBaseUrl, { childOf: parentSpanContext });
 
     span.setTag(Tags.HTTP_METHOD, method.toUpperCase());
     span.setTag(Tags.HTTP_URL, baseUrl);
+
+    for (let i = 0; i < pathValues.valueIndexes.length; ++i) {
+      span.setTag(`http.params_${i + 1}`, pathValues.chunks[pathValues.valueIndexes[i]]);
+    }
+
     span.addTags(getQueryTags(query, "query"));
 
     if (this.options.logBodies) {
