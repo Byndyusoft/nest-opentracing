@@ -1,10 +1,10 @@
-import { OnModuleDestroy, OnModuleInit } from "@nestjs/common";
+import { OnModuleInit } from "@nestjs/common";
 import * as asyncHooks from "async_hooks";
 import { UnknownAsyncContextException } from "./unknown-async-context.exception";
 import { AsyncHooksHelper } from "./async_hooks.helper";
 import { AsyncHooksStorage } from "./async-context.storage";
 
-export class AsyncContext implements OnModuleInit, OnModuleDestroy {
+export class AsyncContext implements OnModuleInit {
   public static getInstance(): AsyncContext {
     if (!this.instance) {
       this.initialize();
@@ -25,15 +25,11 @@ export class AsyncContext implements OnModuleInit, OnModuleDestroy {
   private constructor(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private readonly internalStorage: Map<number, any>,
-    private readonly asyncHookRef: asyncHooks.AsyncHook
+    private readonly asyncHookRef: asyncHooks.AsyncHook,
   ) {}
 
   public onModuleInit() {
     this.asyncHookRef.enable();
-  }
-
-  public onModuleDestroy() {
-    this.asyncHookRef.disable();
   }
 
   public set<TKey, TValue>(key: TKey, value: TValue) {
