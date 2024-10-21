@@ -41,7 +41,7 @@ export class TracingAxiosInterceptor implements OnModuleInit {
           childSpan: span,
         };
 
-        const requestLog: any = { params: axiosConfig.params };
+        const requestLog: any = { headers: axiosConfig.headers, params: axiosConfig.params };
         if (this.options.logBodies) {
           requestLog.body = BodyService.getBody(axiosConfig.data);
         }
