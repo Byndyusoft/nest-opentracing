@@ -41,7 +41,17 @@ export class TracingAxiosInterceptor implements OnModuleInit {
           childSpan: span,
         };
 
-        const requestLog: any = { params: axiosConfig.params };
+        const headersToLog = Object.entries(axiosConfig.headers ?? {}).reduce((result, [key, value]) => {
+          if (["authorization", "x-api-key"].includes(key)) {
+            result[key] = "[Redacted]";
+          } else {
+            result[key] = value;
+          }
+
+          return result;
+        }, {});
+
+        const requestLog: any = { headers: headersToLog, params: axiosConfig.params };
         if (this.options.logBodies) {
           requestLog.body = BodyService.getBody(axiosConfig.data);
         }
